@@ -1,0 +1,35 @@
+services:
+  backend:
+    build: ./backend
+    container_name: simple_backend
+    env_file: .env
+    restart: always
+    expose:
+      - "8000"
+    networks:
+      - app-network
+
+  frontend:
+    build: ./frontend
+    container_name: simple_frontend
+    restart: always
+    expose:
+      - "3000"
+    networks:
+      - app-network
+
+  nginx:
+    build: ./nginx
+    container_name: simple_nginx
+    ports:
+      - "${APP_PORT:-80}:80"
+    depends_on:
+      - backend
+      - frontend
+    networks:
+      - app-network
+    restart: always
+
+networks:
+  app-network:
+    driver: bridge

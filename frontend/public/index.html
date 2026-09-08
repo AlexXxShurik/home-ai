@@ -1,0 +1,271 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Home AI</title>
+    <style>
+        :root {
+            --bg: #0f172a;
+            --card-bg: #1e293b;
+            --primary: #38bdf8;
+            --green: #22c55e;
+            --green-glow: rgba(34, 197, 94, 0.4);
+            --red: #ef4444;
+            --text: #f8fafc;
+            --muted: #94a3b8;
+            --border: #334155;
+        }
+
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            background-color: var(--bg);
+            color: var(--text);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            padding: 1rem;
+        }
+
+        .card {
+            background-color: var(--card-bg);
+            padding: 2rem;
+            border-radius: 16px;
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.4);
+            width: 100%;
+            max-width: 420px;
+        }
+
+        h1 {
+            text-align: center;
+            color: var(--primary);
+            font-size: 1.6rem;
+            margin-bottom: 0.25rem;
+        }
+
+        .subtitle {
+            text-align: center;
+            color: var(--muted);
+            font-size: 0.85rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .group-title {
+            font-size: 0.7rem;
+            text-transform: uppercase;
+            letter-spacing: 0.1em;
+            color: var(--muted);
+            margin: 1rem 0 0.5rem 0.25rem;
+        }
+
+        .device {
+            background: rgba(0, 0, 0, 0.2);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 0.9rem 1.1rem;
+            margin-bottom: 0.6rem;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            transition: border-color 0.3s, box-shadow 0.3s;
+        }
+
+        .device.on {
+            border-color: var(--green);
+            box-shadow: 0 0 16px var(--green-glow);
+        }
+
+        .device-info {
+            display: flex;
+            align-items: center;
+            gap: 0.7rem;
+        }
+
+        .device-icon {
+            width: 38px;
+            height: 38px;
+            border-radius: 10px;
+            background: var(--border);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.1rem;
+            transition: background 0.3s, box-shadow 0.3s;
+        }
+
+        .device.on .device-icon {
+            background: var(--green);
+            box-shadow: 0 0 10px var(--green-glow);
+        }
+
+        .device-name {
+            font-weight: 600;
+            font-size: 0.9rem;
+        }
+
+        .device-status {
+            font-size: 0.72rem;
+            color: var(--muted);
+            margin-top: 1px;
+        }
+
+        .device.on .device-status {
+            color: var(--green);
+        }
+
+        .toggle {
+            position: relative;
+            width: 50px;
+            height: 28px;
+            cursor: pointer;
+            flex-shrink: 0;
+        }
+
+        .toggle input {
+            opacity: 0;
+            width: 0;
+            height: 0;
+        }
+
+        .slider {
+            position: absolute;
+            inset: 0;
+            background: var(--border);
+            border-radius: 28px;
+            transition: background 0.3s;
+        }
+
+        .slider::before {
+            content: '';
+            position: absolute;
+            width: 22px;
+            height: 22px;
+            left: 3px;
+            bottom: 3px;
+            background: var(--text);
+            border-radius: 50%;
+            transition: transform 0.3s;
+        }
+
+        .toggle input:checked + .slider {
+            background: var(--green);
+            box-shadow: 0 0 10px var(--green-glow);
+        }
+
+        .toggle input:checked + .slider::before {
+            transform: translateX(22px);
+        }
+
+        .toggle input:disabled + .slider {
+            opacity: 0.4;
+            cursor: not-allowed;
+        }
+
+        .error {
+            text-align: center;
+            color: var(--red);
+            font-size: 0.78rem;
+            margin-top: 0.5rem;
+            min-height: 1.1rem;
+        }
+    </style>
+</head>
+<body>
+    <div class="card">
+        <h1>Home AI</h1>
+        <p class="subtitle">Управление освещением</p>
+
+        <div id="devices"></div>
+        <div class="error" id="error"></div>
+    </div>
+
+    <script>
+        const DEVICE_CONFIG = [
+            { key: 'corridor', name: 'Коридор', icon: '💡', group: 'Коридор' },
+            { key: 'bathroom_toilet', name: 'Туалет', icon: '🚽', group: 'Ванная' },
+            { key: 'bathroom_bath', name: 'Ванна', icon: '🚿', group: 'Ванная' },
+            { key: 'bedroom_light', name: 'Подсветка', icon: '🌙', group: 'Спальня' },
+            { key: 'bedroom_backlight', name: 'Свет', icon: '💡', group: 'Спальня' },
+        ];
+
+        const devicesEl = document.getElementById('devices');
+        const errorEl = document.getElementById('error');
+
+        function renderDevices(devices) {
+            devicesEl.innerHTML = '';
+            let lastGroup = null;
+
+            devices.forEach(d => {
+                const config = DEVICE_CONFIG.find(c => c.key === d.key);
+                if (!config) return;
+
+                if (config.group && config.group !== lastGroup) {
+                    lastGroup = config.group;
+                    const title = document.createElement('div');
+                    title.className = 'group-title';
+                    title.textContent = config.group;
+                    devicesEl.appendChild(title);
+                } else if (!config.group) {
+                    lastGroup = null;
+                }
+
+                const div = document.createElement('div');
+                div.className = 'device' + (d.is_on ? ' on' : '');
+                div.innerHTML = `
+                    <div class="device-info">
+                        <div class="device-icon">${config.icon}</div>
+                        <div>
+                            <div class="device-name">${d.name}</div>
+                            <div class="device-status">${d.is_on ? 'Включено' : d.online ? 'Выключено' : 'Не в сети'}</div>
+                        </div>
+                    </div>
+                    <label class="toggle">
+                        <input type="checkbox" ${d.is_on ? 'checked' : ''} ${!d.online ? 'disabled' : ''}
+                            data-key="${d.key}">
+                        <span class="slider"></span>
+                    </label>
+                `;
+                const input = div.querySelector('input');
+                input.addEventListener('change', (e) => toggleDevice(d.key, e.target.checked));
+                devicesEl.appendChild(div);
+            });
+        }
+
+        async function fetchDevices() {
+            try {
+                const res = await fetch('/api/devices');
+                const data = await res.json();
+                renderDevices(data);
+                errorEl.textContent = '';
+            } catch (err) {
+                errorEl.textContent = 'Ошибка загрузки: ' + err.message;
+            }
+        }
+
+        async function toggleDevice(key, state) {
+            errorEl.textContent = '';
+            try {
+                const res = await fetch(`/api/devices/${key}/toggle`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ state }),
+                });
+                if (!res.ok) {
+                    const err = await res.json();
+                    throw new Error(err.detail || 'Ошибка');
+                }
+                await fetchDevices();
+            } catch (err) {
+                errorEl.textContent = 'Ошибка: ' + err.message;
+                await fetchDevices();
+            }
+        }
+
+        fetchDevices();
+        setInterval(fetchDevices, 10000);
+    </script>
+</body>
+</html>
