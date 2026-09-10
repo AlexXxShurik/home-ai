@@ -26,10 +26,37 @@ echo "=== Creating remote directory if needed ==="
 ssh "${REMOTE}" "mkdir -p ${DEPLOY_PATH}"
 
 echo "=== Syncing project files to ${REMOTE}:${DEPLOY_PATH} ==="
-rsync -avz --exclude '.git' --exclude 'node_modules' --exclude '__pycache__' --exclude 'snapshot.json' ./ "${REMOTE}:${DEPLOY_PATH}"
+rsync -avz --delete \
+  --exclude '.git' \
+  --exclude '.venv' \
+  --exclude 'node_modules' \
+  --exclude '__pycache__' \
+  --exclude '.idea' \
+  --exclude '.vscode' \
+  --exclude 'snapshot.json' \
+  --exclude '.env' \
+  ./ "${REMOTE}:${DEPLOY_PATH}"
 
-echo "=== Building and launching containers on target server ==="
-ssh "${REMOTE}" "cd ${DEPLOY_PATH} && docker compose up -d --build"
+echo "=== Copying .env to remote ==="
+scp "${ENV_FILE}" "${REMOTE}:${DEPLOY_PATH}/.env"
+
+echo "=== Building and launching containers on Raspberry Pi 5 ==="
+ssh "${REMOTE}" "cd ${DEPLOY_PATH} && docker compose up -d --build backend frontend nginx ollama"
+
+echo "=== Pulling Ollama model (qwen2.5:3b) ==="
+ssh "${REMOTE}" "docker exec simple_ollama ollama pull qwen2.5:3b || true"
+
+echo "=== Restarting voice service on Pi 5 ==="
+ssh "${REMOTE}" "
+  cd ${DEPLOY_PATH}/voice && \
+  python3 -m venv .venv && \
+  .venv/bin/pip install -q --upgrade pip && \
+  .venv/bin/pip install -q openwakeword onnxruntime pyaudio numpy 'vosk==0.3.44' sounddevice httpx 'mcp<2' && \
+  .venv/bin/python -c 'from openwakeword.utils import download_models; download_models()' && \
+  pkill -f 'voice/main.py' 2>/dev/null || true && \
+  nohup .venv/bin/python main.py > /tmp/voice.log 2>&1 &
+"
 
 echo "=== Deployment finished successfully! ==="
-echo "Access your app at http://${DEPLOY_HOST}"
+echo "Frontend: http://${DEPLOY_HOST}"
+echo "Backend API: http://${DEPLOY_HOST}:8000"

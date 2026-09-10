@@ -12,165 +12,124 @@
             --green: #22c55e;
             --green-glow: rgba(34, 197, 94, 0.4);
             --red: #ef4444;
+            --yellow: #eab308;
             --text: #f8fafc;
             --muted: #94a3b8;
             --border: #334155;
         }
-
         * { box-sizing: border-box; margin: 0; padding: 0; }
-
         body {
             font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
             background-color: var(--bg);
             color: var(--text);
             display: flex;
             justify-content: center;
-            align-items: center;
+            align-items: flex-start;
             min-height: 100vh;
             padding: 1rem;
         }
-
         .card {
             background-color: var(--card-bg);
-            padding: 2rem;
+            padding: 1.5rem;
             border-radius: 16px;
             box-shadow: 0 10px 40px rgba(0, 0, 0, 0.4);
             width: 100%;
             max-width: 420px;
         }
+        h1 { text-align: center; color: var(--primary); font-size: 1.5rem; margin-bottom: 0.15rem; }
+        .subtitle { text-align: center; color: var(--muted); font-size: 0.8rem; margin-bottom: 1.2rem; }
 
-        h1 {
-            text-align: center;
-            color: var(--primary);
-            font-size: 1.6rem;
-            margin-bottom: 0.25rem;
+        .status-bar {
+            display: flex; justify-content: space-between; align-items: center;
+            padding: 0.5rem 0.7rem; border-radius: 10px;
+            background: rgba(0,0,0,0.25); margin-bottom: 1rem; font-size: 0.72rem;
         }
+        .status-dot { width: 8px; height: 8px; border-radius: 50%; display: inline-block; margin-right: 5px; }
+        .status-dot.on { background: var(--green); box-shadow: 0 0 6px var(--green-glow); }
+        .status-dot.off { background: var(--red); }
 
-        .subtitle {
-            text-align: center;
-            color: var(--muted);
-            font-size: 0.85rem;
-            margin-bottom: 1.5rem;
+        .voice-widget {
+            text-align: center; padding: 1rem; border-radius: 12px;
+            background: rgba(0,0,0,0.25); margin-bottom: 1rem;
+            border: 1px solid var(--border); transition: border-color 0.3s;
+        }
+        .voice-widget.active { border-color: var(--primary); }
+        .voice-widget.processing { border-color: var(--yellow); }
+        .voice-icon { font-size: 2rem; margin-bottom: 0.3rem; }
+        .voice-label { font-size: 0.78rem; color: var(--muted); }
+        .voice-widget.active .voice-label { color: var(--primary); }
+        .voice-widget.processing .voice-label { color: var(--yellow); }
+        .voice-pulse {
+            width: 40px; height: 40px; border-radius: 50%; margin: 0 auto 0.4rem;
+            display: flex; align-items: center; justify-content: center;
+            background: var(--border); transition: background 0.3s, box-shadow 0.3s;
+        }
+        .voice-widget.active .voice-pulse {
+            background: var(--primary); box-shadow: 0 0 20px rgba(56,189,248,0.5);
+            animation: pulse 1.5s infinite;
+        }
+        .voice-widget.processing .voice-pulse {
+            background: var(--yellow); box-shadow: 0 0 20px rgba(234,179,8,0.5);
+            animation: pulse 0.8s infinite;
+        }
+        @keyframes pulse {
+            0%, 100% { transform: scale(1); opacity: 1; }
+            50% { transform: scale(1.1); opacity: 0.8; }
         }
 
         .group-title {
-            font-size: 0.7rem;
-            text-transform: uppercase;
-            letter-spacing: 0.1em;
-            color: var(--muted);
-            margin: 1rem 0 0.5rem 0.25rem;
+            font-size: 0.68rem; text-transform: uppercase; letter-spacing: 0.1em;
+            color: var(--muted); margin: 0.8rem 0 0.4rem 0.25rem;
         }
-
         .device {
-            background: rgba(0, 0, 0, 0.2);
-            border: 1px solid var(--border);
-            border-radius: 12px;
-            padding: 0.9rem 1.1rem;
-            margin-bottom: 0.6rem;
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
+            background: rgba(0,0,0,0.2); border: 1px solid var(--border); border-radius: 12px;
+            padding: 0.8rem 1rem; margin-bottom: 0.5rem;
+            display: flex; align-items: center; justify-content: space-between;
             transition: border-color 0.3s, box-shadow 0.3s;
         }
-
-        .device.on {
-            border-color: var(--green);
-            box-shadow: 0 0 16px var(--green-glow);
-        }
-
-        .device-info {
-            display: flex;
-            align-items: center;
-            gap: 0.7rem;
-        }
-
+        .device.on { border-color: var(--green); box-shadow: 0 0 12px var(--green-glow); }
+        .device-info { display: flex; align-items: center; gap: 0.6rem; }
         .device-icon {
-            width: 38px;
-            height: 38px;
-            border-radius: 10px;
-            background: var(--border);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 1.1rem;
+            width: 34px; height: 34px; border-radius: 8px; background: var(--border);
+            display: flex; align-items: center; justify-content: center; font-size: 1rem;
             transition: background 0.3s, box-shadow 0.3s;
         }
-
-        .device.on .device-icon {
-            background: var(--green);
-            box-shadow: 0 0 10px var(--green-glow);
-        }
-
-        .device-name {
-            font-weight: 600;
-            font-size: 0.9rem;
-        }
-
-        .device-status {
-            font-size: 0.72rem;
-            color: var(--muted);
-            margin-top: 1px;
-        }
-
-        .device.on .device-status {
-            color: var(--green);
-        }
-
-        .toggle {
-            position: relative;
-            width: 50px;
-            height: 28px;
-            cursor: pointer;
-            flex-shrink: 0;
-        }
-
-        .toggle input {
-            opacity: 0;
-            width: 0;
-            height: 0;
-        }
-
+        .device.on .device-icon { background: var(--green); box-shadow: 0 0 8px var(--green-glow); }
+        .device-name { font-weight: 600; font-size: 0.85rem; }
+        .device-status { font-size: 0.68rem; color: var(--muted); margin-top: 1px; }
+        .device.on .device-status { color: var(--green); }
+        .toggle { position: relative; width: 46px; height: 26px; cursor: pointer; flex-shrink: 0; }
+        .toggle input { opacity: 0; width: 0; height: 0; }
         .slider {
-            position: absolute;
-            inset: 0;
-            background: var(--border);
-            border-radius: 28px;
-            transition: background 0.3s;
+            position: absolute; inset: 0; background: var(--border);
+            border-radius: 26px; transition: background 0.3s;
         }
-
         .slider::before {
-            content: '';
-            position: absolute;
-            width: 22px;
-            height: 22px;
-            left: 3px;
-            bottom: 3px;
-            background: var(--text);
-            border-radius: 50%;
-            transition: transform 0.3s;
+            content: ''; position: absolute; width: 20px; height: 20px;
+            left: 3px; bottom: 3px; background: var(--text);
+            border-radius: 50%; transition: transform 0.3s;
         }
+        .toggle input:checked + .slider { background: var(--green); box-shadow: 0 0 8px var(--green-glow); }
+        .toggle input:checked + .slider::before { transform: translateX(20px); }
+        .toggle input:disabled + .slider { opacity: 0.4; cursor: not-allowed; }
 
-        .toggle input:checked + .slider {
-            background: var(--green);
-            box-shadow: 0 0 10px var(--green-glow);
+        .section-title {
+            font-size: 0.68rem; text-transform: uppercase; letter-spacing: 0.1em;
+            color: var(--muted); margin: 1rem 0 0.4rem 0.25rem;
         }
+        .history { max-height: 140px; overflow-y: auto; }
+        .history::-webkit-scrollbar { width: 4px; }
+        .history::-webkit-scrollbar-thumb { background: var(--border); border-radius: 4px; }
+        .history-item {
+            padding: 0.45rem 0.6rem; border-radius: 8px; margin-bottom: 0.3rem;
+            background: rgba(0,0,0,0.2); font-size: 0.75rem;
+            display: flex; justify-content: space-between; align-items: center;
+        }
+        .history-text { color: var(--text); flex: 1; }
+        .history-tool { color: var(--primary); font-size: 0.65rem; margin-left: 0.5rem; white-space: nowrap; }
+        .history-empty { color: var(--muted); font-size: 0.75rem; text-align: center; padding: 0.5rem; }
 
-        .toggle input:checked + .slider::before {
-            transform: translateX(22px);
-        }
-
-        .toggle input:disabled + .slider {
-            opacity: 0.4;
-            cursor: not-allowed;
-        }
-
-        .error {
-            text-align: center;
-            color: var(--red);
-            font-size: 0.78rem;
-            margin-top: 0.5rem;
-            min-height: 1.1rem;
-        }
+        .error { text-align: center; color: var(--red); font-size: 0.75rem; margin-top: 0.4rem; min-height: 1rem; }
     </style>
 </head>
 <body>
@@ -178,7 +137,25 @@
         <h1>Home AI</h1>
         <p class="subtitle">Управление освещением</p>
 
+        <div class="status-bar">
+            <span><span class="status-dot on" id="pi-dot"></span>Pi5</span>
+            <span id="pi-status">Подключено</span>
+        </div>
+
+        <div class="voice-widget" id="voice-widget">
+            <div class="voice-pulse">
+                <span class="voice-icon" id="voice-icon">🎤</span>
+            </div>
+            <div class="voice-label" id="voice-label">Ожидание wake word</div>
+        </div>
+
         <div id="devices"></div>
+
+        <div class="section-title">История команд</div>
+        <div class="history" id="history">
+            <div class="history-empty">Нет команд</div>
+        </div>
+
         <div class="error" id="error"></div>
     </div>
 
@@ -193,25 +170,43 @@
 
         const devicesEl = document.getElementById('devices');
         const errorEl = document.getElementById('error');
+        const historyEl = document.getElementById('history');
+        const voiceWidget = document.getElementById('voice-widget');
+        const voiceLabel = document.getElementById('voice-label');
+        const voiceIcon = document.getElementById('voice-icon');
+        const piDot = document.getElementById('pi-dot');
+        const piStatus = document.getElementById('pi-status');
+
+        let ws = null;
+        let piOnline = false;
+
+        function setPiStatus(online) {
+            piOnline = online;
+            piDot.className = 'status-dot ' + (online ? 'on' : 'off');
+            piStatus.textContent = online ? 'Подключено' : 'Не в сети';
+        }
+
+        function setVoiceState(state) {
+            voiceWidget.className = 'voice-widget' + (state === 'listening' ? ' active' : state === 'processing' ? ' processing' : '');
+            const labels = { idle: 'Ожидание wake word', listening: 'Слушаю...', processing: 'Обрабатываю...' };
+            const icons = { idle: '🎤', listening: '👂', processing: '🧠' };
+            voiceLabel.textContent = labels[state] || labels.idle;
+            voiceIcon.textContent = icons[state] || icons.idle;
+        }
 
         function renderDevices(devices) {
             devicesEl.innerHTML = '';
             let lastGroup = null;
-
             devices.forEach(d => {
                 const config = DEVICE_CONFIG.find(c => c.key === d.key);
                 if (!config) return;
-
                 if (config.group && config.group !== lastGroup) {
                     lastGroup = config.group;
                     const title = document.createElement('div');
                     title.className = 'group-title';
                     title.textContent = config.group;
                     devicesEl.appendChild(title);
-                } else if (!config.group) {
-                    lastGroup = null;
                 }
-
                 const div = document.createElement('div');
                 div.className = 'device' + (d.is_on ? ' on' : '');
                 div.innerHTML = `
@@ -223,13 +218,11 @@
                         </div>
                     </div>
                     <label class="toggle">
-                        <input type="checkbox" ${d.is_on ? 'checked' : ''} ${!d.online ? 'disabled' : ''}
-                            data-key="${d.key}">
+                        <input type="checkbox" ${d.is_on ? 'checked' : ''} ${!d.online ? 'disabled' : ''} data-key="${d.key}">
                         <span class="slider"></span>
                     </label>
                 `;
-                const input = div.querySelector('input');
-                input.addEventListener('change', (e) => toggleDevice(d.key, e.target.checked));
+                div.querySelector('input').addEventListener('change', (e) => toggleDevice(d.key, e.target.checked));
                 devicesEl.appendChild(div);
             });
         }
@@ -264,8 +257,57 @@
             }
         }
 
+        async function fetchHistory() {
+            try {
+                const res = await fetch('/api/commands');
+                const data = await res.json();
+                if (!data.length) {
+                    historyEl.innerHTML = '<div class="history-empty">Нет команд</div>';
+                    return;
+                }
+                historyEl.innerHTML = data.map(c => {
+                    const t = new Date(c.ts * 1000);
+                    const time = t.getHours().toString().padStart(2,'0') + ':' + t.getMinutes().toString().padStart(2,'0');
+                    return `<div class="history-item"><span class="history-text">${c.text}</span><span class="history-tool">${c.tool} · ${time}</span></div>`;
+                }).join('');
+            } catch {}
+        }
+
+        function connectWS() {
+            const proto = location.protocol === 'https:' ? 'wss:' : 'ws:';
+            ws = new WebSocket(`${proto}//${location.host}/ws`);
+            ws.onopen = () => setPiStatus(true);
+            ws.onclose = () => { setPiStatus(false); setTimeout(connectWS, 3000); };
+            ws.onerror = () => ws.close();
+            ws.onmessage = (e) => {
+                try {
+                    const msg = JSON.parse(e.data);
+                    if (msg.type === 'status' && msg.devices) renderDevices(msg.devices);
+                } catch {}
+            };
+        }
+
+        // Simulate voice state changes based on polling
+        let lastVoicePoll = 0;
+        function pollVoice() {
+            fetch('/api/commands').then(r => r.json()).then(data => {
+                if (data.length) {
+                    const latest = data[0].ts;
+                    if (latest > lastVoicePoll) {
+                        lastVoicePoll = latest;
+                        setVoiceState('processing');
+                        setTimeout(() => setVoiceState('idle'), 1500);
+                    }
+                }
+            }).catch(() => {});
+        }
+
         fetchDevices();
+        fetchHistory();
+        connectWS();
         setInterval(fetchDevices, 10000);
+        setInterval(fetchHistory, 5000);
+        setInterval(pollVoice, 2000);
     </script>
 </body>
 </html>

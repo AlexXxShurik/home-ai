@@ -4,8 +4,8 @@ services:
     container_name: simple_backend
     env_file: .env
     restart: always
-    expose:
-      - "8000"
+    ports:
+      - "8000:8000"
     networks:
       - app-network
 
@@ -30,6 +30,43 @@ services:
       - app-network
     restart: always
 
+  voice:
+    build:
+      context: .
+      dockerfile: voice/Dockerfile
+    container_name: simple_voice
+    restart: unless-stopped
+    devices:
+      - "/dev/snd:/dev/snd"
+    volumes:
+      - ./model:/app/model
+      - vosk-cache:/root/.cache/vosk
+    environment:
+      - OLLAMA_URL=http://ollama:11434
+      - OLLAMA_MODEL=qwen2.5:3b
+      - BACKEND_URL=http://backend:8000
+      - MCP_SERVER_PATH=/app/mcp_server/server.py
+    depends_on:
+      - ollama
+      - backend
+    networks:
+      - app-network
+
+  ollama:
+    image: ollama/ollama
+    container_name: simple_ollama
+    restart: always
+    ports:
+      - "11434:11434"
+    volumes:
+      - ollama-data:/root/.ollama
+    networks:
+      - app-network
+
 networks:
   app-network:
     driver: bridge
+
+volumes:
+  vosk-cache:
+  ollama-data:
