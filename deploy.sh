@@ -49,10 +49,11 @@ ssh "${REMOTE}" "docker exec simple_ollama ollama pull qwen2.5:3b || true"
 echo "=== Restarting voice service on Pi 5 ==="
 ssh "${REMOTE}" "
   cd ${DEPLOY_PATH}/voice && \
-  python3 -m venv .venv && \
-  .venv/bin/pip install -q --upgrade pip && \
-  .venv/bin/pip install -q openwakeword onnxruntime pyaudio numpy 'vosk==0.3.44' sounddevice httpx 'mcp<2' && \
-  .venv/bin/python -c 'from openwakeword.utils import download_models; download_models()' && \
+  if [ ! -d .venv ]; then
+    python3 -m venv .venv && \
+    .venv/bin/pip install -q --upgrade pip && \
+    .venv/bin/pip install -q 'openwakeword==0.4.0' onnxruntime numpy 'vosk==0.3.44' pyalsaaudio httpx 'mcp<2'
+  fi && \
   pkill -f 'voice/main.py' 2>/dev/null || true && \
   nohup .venv/bin/python main.py > /tmp/voice.log 2>&1 &
 "
